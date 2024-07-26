@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Configuration Tool</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background-color: #343a40;
+            color: #fff;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+        .sidebar a {
+            color: #adb5bd;
+        }
+        .sidebar a:hover {
+            color: #ced4da;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar p-4">
+            <h1 class="h4 font-weight-bold mb-4">IP Config Tool</h1>
+            <ul class="list-unstyled">
+                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i class="fas fa-cog mr-2"></i><span>Tools & Settings</span></a></li>
+                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i class="fas fa-file-import mr-2"></i><span>Import Config</span></a></li>
+                <li><a href="#" class="d-flex align-items-center"><i class="fas fa-file-alt mr-2"></i><span>View Logs</span></a></li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-fill p-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">                
+                <div class="container">
+                    <h1>IP Configurator</h1>
+                    <form id="ipConfigForm">
+                        <div class="form-group">
+                            <label for="branch">Branch:</label>
+                            <input type="text" class="form-control" id="branch" name="branch" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sector">Sector:</label>
+                            <input type="text" class="form-control" id="sector" name="sector" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="noOfComputers">No: of Computers:</label>
+                            <input type="number" class="form-control" id="noOfComputers" name="noOfComputers" required>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary" id="btnAdd">Add</button>
+                        </div>
+                    </form>
+                    
+                    <button type="button" class="btn btn-secondary" id="btnGenerate">Generate Configuration</button>
+                    
+                    <h3 class="networkType hide mt-4" style="display: none;">Suitable Network Type is : <span id="networkType" class="text-primary font-weight-bold"></span></h3>
+                    <h3 class="networkClass hide" style="display: none;">Suitable Network Class is : <span id="networkClass" class="text-primary font-weight-bold"></span></h3>
+                    
+                    <table class="table table-hover mt-4" id="configTable">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Branch</th>
+                                <th scope="col">Sector</th>
+                                <th scope="col">No. of Computers</th>
+                                <th scope="col">Block Size</th>
+                                <th scope="col">Network Add</th>
+                                <th scope="col">Default Gateway</th>
+                                <th scope="col">Broadcast Add</th>
+                                <th scope="col">SNM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- Network Topology -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Network Topology</h3>
+                    <div class="border border-gray-300 rounded-lg p-4">
+                        <img src="/topology" alt="Network topology chart showing branches, sectors, and computers" class="w-full h-auto" id="topologyImage">
+                    </div>
+                </div>
+
+                
+                <!-- Buttons -->
+                <div class="d-flex space-x-4">
+                    <button class="btn btn-success mr-2">Save</button>
+                    <button class="btn btn-warning mr-2">Reset</button>
+                    <button class="btn btn-info">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
