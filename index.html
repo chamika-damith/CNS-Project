@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
         }
+
         .sidebar {
             background-color: #343a40;
             color: #fff;
@@ -19,29 +21,35 @@
             position: sticky;
             top: 0;
         }
+
         .sidebar a {
             color: #adb5bd;
         }
+
         .sidebar a:hover {
             color: #ced4da;
         }
     </style>
 </head>
+
 <body>
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar p-4">
             <h1 class="h4 font-weight-bold mb-4">IP Config Tool</h1>
             <ul class="list-unstyled">
-                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i class="fas fa-cog mr-2"></i><span>Tools & Settings</span></a></li>
-                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i class="fas fa-file-import mr-2"></i><span>Import Config</span></a></li>
-                <li><a href="#" class="d-flex align-items-center"><i class="fas fa-file-alt mr-2"></i><span>View Logs</span></a></li>
+                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i
+                            class="fas fa-cog mr-2"></i><span>Tools & Settings</span></a></li>
+                <li class="mb-3"><a href="#" class="d-flex align-items-center"><i
+                            class="fas fa-file-import mr-2"></i><span>Import Config</span></a></li>
+                <li><a href="#" class="d-flex align-items-center"><i class="fas fa-file-alt mr-2"></i><span>View
+                            Logs</span></a></li>
             </ul>
         </div>
-        
+
         <!-- Main Content -->
         <div class="flex-fill p-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm">                
+            <div class="bg-white p-4 rounded-lg shadow-sm">
                 <div class="container">
                     <h1>IP Configurator</h1>
                     <form id="ipConfigForm">
@@ -61,12 +69,14 @@
                             <button type="button" class="btn btn-primary" id="btnAdd">Add</button>
                         </div>
                     </form>
-                    
+
                     <button type="button" class="btn btn-secondary" id="btnGenerate">Generate Configuration</button>
-                    
-                    <h3 class="networkType hide mt-4" style="display: none;">Suitable Network Type is : <span id="networkType" class="text-primary font-weight-bold"></span></h3>
-                    <h3 class="networkClass hide" style="display: none;">Suitable Network Class is : <span id="networkClass" class="text-primary font-weight-bold"></span></h3>
-                    
+
+                    <h3 class="networkType hide mt-4" style="display: none;">Suitable Network Type is : <span
+                            id="networkType" class="text-primary font-weight-bold"></span></h3>
+                    <h3 class="networkClass hide" style="display: none;">Suitable Network Class is : <span
+                            id="networkClass" class="text-primary font-weight-bold"></span></h3>
+
                     <table class="table table-hover mt-4" id="configTable">
                         <thead class="thead-dark">
                             <tr>
@@ -83,16 +93,17 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
-                
+
                 <!-- Network Topology -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold mb-4">Network Topology</h3>
                     <div class="border border-gray-300 rounded-lg p-4">
-                        <img src="/topology" alt="Network topology chart showing branches, sectors, and computers" class="w-full h-auto" id="topologyImage">
+                        <img src="/topology" alt="Network topology chart showing branches, sectors, and computers"
+                            class="w-full h-auto" id="topologyImage">
                     </div>
                 </div>
 
-                
+
                 <!-- Buttons -->
                 <div class="d-flex space-x-4">
                     <button class="btn btn-success mr-2">Save</button>
@@ -102,5 +113,131 @@
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let branchDetails = [];
+
+        class BranchModel {
+            constructor(branch, sector, numOfCom, blockSize, networkAdd, DefaultGW, BroadcastAdd, SNM) {
+                this.branch = branch;
+                this.sector = sector;
+                this.numOfCom = numOfCom;
+                this.blockSize = blockSize;
+                this.networkAdd = networkAdd;
+                this.DefaultGW = DefaultGW;
+                this.BroadcastAdd = BroadcastAdd;
+                this.SNM = SNM;
+            }
+        }
+
+        let ipAdd = '192.168.0.0';
+
+        $(document).ready(function () {
+            $('#btnGenerate').on('click', () => {
+                console.log("generatr")
+                if (branchDetails.length === 0) {
+                    alert("Please add branch details before generating the topology.");
+                    return;
+                }
+                setNetworkAddress();
+                sortBranchesAndAssignIPs(branchDetails, ipAdd);
+                loadBranchTable(branchDetails);
+                sendBranchDetails(branchDetails);
+            });
+
+            $('#btnAdd').on('click', () => {
+                const branch = $('#branch').val();
+                const sector = $('#sector').val();
+                const numOfCom = parseInt($('#noOfComputers').val());
+
+                if (branch === "" || sector === "" || isNaN(numOfCom)) {
+                    alert("Please fill all the fields");
+                } else {
+                    let bSize = checkBlockSize(numOfCom);
+                    let snm = checkSNM(bSize);
+
+                    let branchDetail = new BranchModel(branch, sector, numOfCom, bSize, "", "", "", snm);
+                    branchDetails.push(branchDetail);
+
+                    clearFields();
+                    loadBranchTable(branchDetails);
+                }
+            });
+        });
+
+        function sortBranchesAndAssignIPs(branchDetails, startIp) {
+            branchDetails.forEach(detail => {
+                detail.networkAdd = startIp;
+                detail.DefaultGW = incrementIP(startIp, 1);
+                startIp = incrementIP(startIp, detail.blockSize);
+                detail.BroadcastAdd = incrementIP(startIp, -1);
+            });
+        }
+
+        function setNetworkAddress() {
+            branchDetails.forEach((branch, index) => {
+                branch.networkAdd = ipAdd;
+                ipAdd = incrementIP(ipAdd, branch.blockSize);
+            });
+        }
+
+        function incrementIP(ip, increment) {
+            const parts = ip.split('.').map(Number);
+            let total = parts[3] + increment;
+            parts[3] = total % 256;
+            total = Math.floor(total / 256);
+            parts[2] = (parts[2] + total) % 256;
+            total = Math.floor(parts[2] / 256);
+            parts[1] = (parts[1] + total) % 256;
+            total = Math.floor(parts[1] / 256);
+            parts[0] = (parts[0] + total) % 256;
+            return parts.join('.');
+        }
+
+        function loadBranchTable(data) {
+            $('#tableBody').empty();
+            data.forEach(branch => {
+                const record = `<tr>
+                    <td>${branch.branch}</td>
+                    <td>${branch.sector}</td>
+                    <td>${branch.numOfCom}</td>
+                    <td>${branch.blockSize}</td>
+                    <td>${branch.networkAdd}</td>
+                    <td>${branch.DefaultGW}</td>
+                    <td>${branch.BroadcastAdd}</td>
+                    <td>${branch.SNM}</td>
+                </tr>`;
+                $('#configTable').append(record);
+            });
+        }
+
+        function checkBlockSize(data) {
+            if (data < 2) return 2;
+            if (data < 4) return 4;
+            if (data < 8) return 8;
+            if (data < 16) return 16;
+            if (data < 32) return 32;
+            if (data < 64) return 64;
+            if (data < 128) return 128;
+            return 256;
+        }
+
+        function checkSNM(data) {
+            return `255.255.255.${256 - data}`;
+        }
+
+        function clearFields() {
+            $('#branch').val('');
+            $('#sector').val('');
+            $('#noOfComputers').val('');
+        }
+
+
+    </script>
 </body>
+
 </html>
