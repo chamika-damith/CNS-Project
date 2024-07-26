@@ -236,6 +236,23 @@
             $('#noOfComputers').val('');
         }
 
+        function sendBranchDetails(details) {
+            console.log("Sending branch details:", details);
+            $.ajax({
+                type: "POST",
+                url: "/topology",
+                data: JSON.stringify(details),
+                contentType: "application/json",
+                success: function (response) {
+                    console.log("Response received:", response);
+                    $('#topologyImage').attr('src', 'data:image/png;base64,' + response.chart);
+                },
+                error: function (error) {
+                    console.log("Error occurred:", error);
+                }
+            });
+        }
+
 
     </script>
 </body>
